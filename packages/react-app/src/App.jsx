@@ -72,7 +72,7 @@ function App(props) {
   // You can warn the user if you would like them to be on a specific network
   let localChainId = localProvider && localProvider._network && localProvider._network.chainId
   if(DEBUG) console.log("🏠 localChainId",localChainId)
-
+  debugger;
   let selectedChainId = userProvider && userProvider._network && userProvider._network.chainId
   if(DEBUG) console.log("🕵🏻‍♂️ selectedChainId:",selectedChainId)
 
@@ -124,7 +124,7 @@ function App(props) {
   console.log("🏷 Resolved austingriffith.eth as:",addressFromENS)
   */
   let networkDisplay = ""
-  if(localChainId && selectedChainId && localChainId != selectedChainId ){
+  if(localChainId && selectedChainId && localChainId != selectedChainId && NETWORK(selectedChainId)){
     networkDisplay = (
       <div style={{zIndex:2, position:'absolute', right:0,top:60,padding:16}}>
         <Alert
@@ -148,6 +148,7 @@ function App(props) {
   }
 
   const loadWeb3Modal = useCallback(async () => {
+    debugger;
     const provider = await web3Modal.connect();
     setInjectedProvider(new Web3Provider(provider));
   }, [setInjectedProvider]);
@@ -218,7 +219,7 @@ function App(props) {
             */}
 
             <Contract
-              name="YourContract"
+              name="TimeKeeper"
               signer={userProvider.getSigner()}
               provider={localProvider}
               address={address}
@@ -305,7 +306,7 @@ function App(props) {
            logoutOfWeb3Modal={logoutOfWeb3Modal}
            blockExplorer={blockExplorer}
          />
-         {faucetHint}
+         {/* {faucetHint} */}
       </div>
 
       {/* 🗺 Extra UI like gas price, eth price, faucet, and support: */}

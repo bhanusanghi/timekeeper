@@ -23,6 +23,7 @@ import { INFURA_ID } from "../constants";
 
 const useUserProvider = (injectedProvider, localProvider) =>
 useMemo(() => {
+  debugger;
   if (injectedProvider) {
     console.log("🦊 Using injected provider");
     return injectedProvider;

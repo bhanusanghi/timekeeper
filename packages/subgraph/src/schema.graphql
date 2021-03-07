@@ -1,15 +1,19 @@
-type Purpose @entity {
+type Hour @entity {
   id: ID!
-  sender: Sender!
+  member: Member!
   purpose: String!
   createdAt: BigInt!
   transactionHash: String!
 }
 
-type Sender @entity {
+type Member @entity {
   id: ID!
   address: Bytes!
-  purposes: [Purpose!] @derivedFrom(field: "sender")
+  loggedHours: [Hour!] @derivedFrom(field: "member")
+  approvedHours: [Hour!] @derivedFrom(field: "member")
+  paidHours: [Hour!] @derivedFrom(field: "member")
+  approver: Member
+  approvees : [Member!]
   createdAt: BigInt!
-  purposeCount: BigInt!
+  lastPaidAt: BigInt!
 }
