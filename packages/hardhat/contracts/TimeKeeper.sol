@@ -4,45 +4,35 @@ pragma solidity >=0.6.0 <0.9.0;
 import "hardhat/console.sol";
 
 contract TimeKeeper {
-    event LogHour(
+    event LogActivity(
+        uint256 activityId,
         address member,
         string activityType,
         uint256 numberOfHours,
         uint256 startTimestamp,
         uint256 endTimestamp
     );
-    event UpdateApprover(
-        address member,
-        string activityType,
-        uint256 numberOfHours,
-        uint256 startTimestamp,
-        uint256 endTimestamp
-    );
-    event ApproveHour(
-        address member,
-        string activityType,
-        uint256 numberOfHours,
-        uint256 startTimestamp,
-        uint256 endTimestamp
-    );
-    // event Payout(address member, Hour hour);
+    event ApproveActivity(uint256 activityId);
+    event UpdateApprover(address member, address newApprover);
+    // event Payout(address member, Activity Activity);
 
-    struct Hour {
+    struct Activity {
+        uint256 activityId;
         string activityType;
-        // bool isApproved;
-        // bool isPaid;
+        bool isApproved;
+        bool isPaid;
         uint256 numberOfHours;
         uint256 startTimestamp;
         uint256 endTimestamp;
     }
 
-    mapping(address => Hour[]) public loggedHours;
-    mapping(address => Hour[]) public paidHours;
-    mapping(address => Hour[]) public approvedHours;
+    mapping(address => mapping(uint256 => Activity)) public loggedActivities;
 
     mapping(address => address) public approver;
 
     mapping(address => string) public members;
+
+    uint256 nextActivityId = 0;
 
     constructor() {
         //initialize current members of DAO.
@@ -51,7 +41,7 @@ contract TimeKeeper {
     function addMember(address userAddress, string memory role) public {
         //check if a current member is adding it or not.
         require(
-            !StringUtils.equal(members[msg.sender], ""),
+            members[msg.sender] != string("0x00"),
             "This operation can only be carried out by current members of DAO"
         );
         members[userAddress] = role;
@@ -76,33 +66,47 @@ contract TimeKeeper {
         // check if called by the current approveer otherwise ignore
     }
 
-    function logHour(
+    function logActivity(
         string memory activityType,
         uint256 numberOfHours,
         uint256 startTimestamp,
         uint256 endTimestamp
     ) public returns (bool) {
         require(
-            !StringUtils.equal(members[msg.sender], ""),
+            members[msg.sender] != string("0x00"),
             "This operation can only be carried out by current members of DAO"
         );
-        Hour memory hour =
-            Hour(activityType, numberOfHours, startTimestamp, endTimestamp);
-        loggedHours[msg.sender].push(hour);
-        emit LogHour(
+        Activity memory activity =
+            Activity(
+                nextActivityId,
+                activityType,
+                false,
+                false,
+                numberOfHours,
+                startTimestamp,
+                endTimestamp
+            );
+        loggedActivities[msg.sender][nextActivityId] = activity;
+        emit LogActivity(
+            nextActivityId,
             msg.sender,
+            false,
+            false,
             activityType,
             numberOfHours,
             startTimestamp,
             endTimestamp
         );
+        nextActivityId++;
         return true;
     }
 
-    // function approveHour(member, Hour hour) public {
-    // require(
-    //     approver[member] == msg.sender,
-    //     "This operation can only be carried out by the approver of the member"
-    // );
-    // }
+    function approveActivity(member, uint256 activityId) public {
+        require(
+            approver[member] == msg.sender,
+            "This operation can only be carried out by the approver of the member"
+        );
+        loggedActivities[msg.sender][nextActivityId].isApproved = true;
+        emit ApproveActivity(activityId);
+    }
 }

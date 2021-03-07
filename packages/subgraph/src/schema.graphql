@@ -1,4 +1,4 @@
-type Hour @entity {
+type Activity @entity {
   id: ID!
   member: Member!
   purpose: String!
