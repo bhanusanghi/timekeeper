@@ -3,23 +3,29 @@ schema:
   file: ./src/schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: YourContract
-    network: localhost
+    name: TimeKeeper
+    network: ropsten
     source:
-      address: '{{YourContractAddress}}'
-      abi: YourContract
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      abi: TimeKeeper
       startBlock: 1
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - Purpose
-        - Sender
+        - Activity
+        - Member
       abis:
-        - name: YourContract
-          file: ./abis/YourContract.json
+        - name: TimeKeeper
+          file: ./abis/TimeKeeper.json
       eventHandlers:
-        - event: SetPurpose(address,string)
-          handler: handleSetPurpose
+        - event: LogActivity(uint256,address,string,bool,bool,uint256,uint256,uint256)
+          handler: handleLogActivity
+        - event: ApproveActivity(uint256,address)
+          handler: handleApproveActivity
+        - event: UpdateApprover(address,address,address)
+          handler: handleUpdateApprover
+        - event: AddMember(address,address,string)
+          handler: handleAddMember
       file: ./src/mapping.ts

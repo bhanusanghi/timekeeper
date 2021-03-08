@@ -21,7 +21,7 @@ const { isAddress, getAddress, formatUnits, parseUnits } = utils;
 //
 // Select the network you want to deploy to here:
 //
-const defaultNetwork = "localhost";
+const defaultNetwork = "ropsten";
 
 function mnemonic() {
   try {
@@ -45,6 +45,9 @@ module.exports = {
   // (you will need to restart the `yarn run start` dev server after editing the .env)
 
   networks: {
+    hardhat: {
+      chainId: 1337,
+    },
     localhost: {
       url: "http://localhost:8545",
       /*
@@ -53,31 +56,31 @@ module.exports = {
       */
     },
     rinkeby: {
-      url: "https://rinkeby.infura.io/v3/0223c550201f447497f8960cd1e9d261", //<---- YOUR INFURA ID! (or it won't work)
+      url: "https://rinkeby.infura.io/v3/faa11e3517ab4abf9059a2ced501fe40", //<---- YOUR INFURA ID! (or it won't work)
       accounts: {
         mnemonic: mnemonic(),
       },
     },
     kovan: {
-      url: "https://kovan.infura.io/v3/0223c550201f447497f8960cd1e9d261", //<---- YOUR INFURA ID! (or it won't work)
+      url: "https://kovan.infura.io/v3/faa11e3517ab4abf9059a2ced501fe40", //<---- YOUR INFURA ID! (or it won't work)
       accounts: {
         mnemonic: mnemonic(),
       },
     },
     mainnet: {
-      url: "https://mainnet.infura.io/v3/0223c550201f447497f8960cd1e9d261", //<---- YOUR INFURA ID! (or it won't work)
+      url: "https://mainnet.infura.io/v3/faa11e3517ab4abf9059a2ced501fe40", //<---- YOUR INFURA ID! (or it won't work)
       accounts: {
         mnemonic: mnemonic(),
       },
     },
     ropsten: {
-      url: "https://ropsten.infura.io/v3/0223c550201f447497f8960cd1e9d261", //<---- YOUR INFURA ID! (or it won't work)
+      url: "https://ropsten.infura.io/v3/faa11e3517ab4abf9059a2ced501fe40", //<---- YOUR INFURA ID! (or it won't work)
       accounts: {
         mnemonic: mnemonic(),
       },
     },
     goerli: {
-      url: "https://goerli.infura.io/v3/0223c550201f447497f8960cd1e9d261", //<---- YOUR INFURA ID! (or it won't work)
+      url: "https://goerli.infura.io/v3/faa11e3517ab4abf9059a2ced501fe40", //<---- YOUR INFURA ID! (or it won't work)
       accounts: {
         mnemonic: mnemonic(),
       },

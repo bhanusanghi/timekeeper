@@ -1,19 +1,42 @@
+# type Purpose @entity {
+#   id: ID!
+#   sender: Sender!
+#   purpose: String!
+#   createdAt: BigInt!
+#   transactionHash: String!
+# }
+
+# type Sender @entity {
+#   id: ID!
+#   address: Bytes!
+#   purposes: [Purpose!] @derivedFrom(field: "sender")
+#   createdAt: BigInt!
+#   purposeCount: BigInt!
+# }
+
 type Activity @entity {
   id: ID!
   member: Member!
-  purpose: String!
+  activityType: String!
+  isApproved: Boolean!
+  isPaid: Boolean!
+  numberOfHours: BigInt!
   createdAt: BigInt!
+  startTimestamp: BigInt!
+  endTimestamp: BigInt!
   transactionHash: String!
+  approvedBy: Member
+  approvedOn: BigInt
 }
 
 type Member @entity {
   id: ID!
   address: Bytes!
-  loggedHours: [Hour!] @derivedFrom(field: "member")
-  approvedHours: [Hour!] @derivedFrom(field: "member")
-  paidHours: [Hour!] @derivedFrom(field: "member")
+  role: String!
+  loggedActivities: [Activity!] @derivedFrom(field: "member")
   approver: Member
-  approvees : [Member!]
+  approvees : [Member!] @derivedFrom(field: "approver")
+  addedBy: Member!
+  lastPaidAt: BigInt
   createdAt: BigInt!
-  lastPaidAt: BigInt!
 }
