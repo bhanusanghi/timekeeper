@@ -11,7 +11,7 @@ import { useExchangePrice, useGasPrice, useUserProvider, useEventListener, useCo
 import { Header, Account } from "./components";
 import { Transactor } from "./helpers";
 //import Hints from "./Hints";
-import { Subgraph, TimeLogger, ActivityHistory } from "./views";
+import { TimeLogger, ActivityHistory, ApproveActivity, Members } from "./views";
 import { INFURA_ID, NETWORK, NETWORKS } from "./constants";
 
 /// 📡 What chain are your contracts deployed to?
@@ -33,6 +33,7 @@ const blockExplorer = targetNetwork.blockExplorer;
 
 function App(props) {
   const [injectedProvider, setInjectedProvider] = useState();
+  const [flagForRefetchingData, updateFlagForRefetchingData] = useState(false);
   const userProvider = useUserProvider(injectedProvider, localProvider);
   const address = useUserAddress(userProvider);
   if (DEBUG) console.log("👩‍💼 selected address:", address);
@@ -124,7 +125,7 @@ function App(props) {
               }}
               to="/history"
             >
-              History
+              Logged Activities
             </Link>
           </Menu.Item>
           <Menu.Item key="/approve">
@@ -137,14 +138,14 @@ function App(props) {
               Approve
             </Link>
           </Menu.Item>
-          <Menu.Item key="/users">
+          <Menu.Item key="/members">
             <Link
               onClick={() => {
-                setRoute("/users");
+                setRoute("/members");
               }}
-              to="/users"
+              to="/members"
             >
-              Users
+              Members
             </Link>
           </Menu.Item>
         </Menu>
@@ -156,6 +157,8 @@ function App(props) {
               provider={localProvider}
               address={address}
               blockExplorer={blockExplorer}
+              updateFlagForRefetchingData={() => updateFlagForRefetchingData(!flagForRefetchingData)}
+              flagForRefetchingData={flagForRefetchingData}
             />
             {/* <Contract
               name="TimeKeeper"
@@ -174,9 +177,23 @@ function App(props) {
             />
           </Route> */}
           <Route path="/history">
-            <ActivityHistory />
+            <ActivityHistory
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+              flagForRefetchingData={flagForRefetchingData}
+            />
           </Route>
           <Route path="/approve">
+            <ApproveActivity
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+              updateFlagForRefetchingData={() => updateFlagForRefetchingData(!flagForRefetchingData)}
+              flagForRefetchingData={flagForRefetchingData}
+            />
             {/* <ExampleUI
               address={address}
               userProvider={userProvider}
@@ -191,7 +208,15 @@ function App(props) {
               setPurposeEvents={setPurposeEvents}
             /> */}
           </Route>
-          <Route path="/users"></Route>
+          <Route path="/members">
+            <Members
+              signer={userProvider.getSigner()}
+              provider={localProvider}
+              address={address}
+              blockExplorer={blockExplorer}
+            />
+          </Route>
+
           {/* <Route path="/mainnetdai">
             <Contract
               name="DAI"

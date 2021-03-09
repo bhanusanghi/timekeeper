@@ -4,4 +4,5 @@ export { default as Subgraph } from "./Subgraph";
 export { default as TimeLogger } from "./TimeLogger";
 export { default as ActivityHistory } from "./ActivityHistory";
 export { default as ApproveActivity } from "./ApproveActivity";
+export { default as Members } from "./Members";
 

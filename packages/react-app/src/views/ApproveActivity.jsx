@@ -10,22 +10,34 @@ const { Option } = Select;
 function ApproveActivity(props) {
   const [selectedApprovee, updateSelectedApprovee] = useState("");
 
-  const ourContractAddress = 0x1e389a99c3a5670d3882dbd75898a69877d7a835;
+  const ourContractAddress = "0x60F26b793d1774FF0A36012550c9907f7D2785aE";
   const timekeeperContract = new ethers.Contract(ourContractAddress, abi, props.signer);
 
-  let userAddress = props.address;
-
+  let userAddress = props.address.toString().toLowerCase();
   const GET_MEMBER_DETAILS = gql`
-    query Members($userAddress: String!) {
-      members(address: $userAddress) {
+    query Members($userAddress: ID!) {
+      members(where: { id: $userAddress }) {
         id
         address
         role
-        approver
-        loggedActivities
+        approver {
+          id
+        }
+        approvees {
+          id
+        }
+        loggedActivities {
+          activityType
+          isApproved
+          numberOfHours
+          startTimestamp
+          activityId
+        }
       }
     }
   `;
+
+  const [getApproveeData, ...approveeData] = useLazyQuery(GET_MEMBER_DETAILS, { pollInterval: 1000 });
 
   const tableColumns = [
     {
@@ -43,7 +55,7 @@ function ApproveActivity(props) {
       dataIndex: "startTimestamp",
       key: "startTimestamp",
       render: timestamp => {
-        let d = new Date(timestamp);
+        let d = new Date(parseInt(timestamp));
         return (
           d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear() + " " + d.getHours() + ":" + d.getMinutes()
         );
@@ -59,15 +71,15 @@ function ApproveActivity(props) {
     },
     {
       title: "Actions",
-      dataIndex: "id",
       key: "actions",
-      render: (id, record) => (
+      render: (text, record) => (
         <Button
           size="small"
           type="primary"
           onClick={async () => {
-            await timekeeperContract.approveActivity(props.address, id);
-            getApproveeData({ variables: { userAddress: selectedApprovee } });
+            let tx = await timekeeperContract.approveActivity(props.address, record.activityId);
+            await tx.wait();
+            // approveeData[0].refetch();
           }}
           disabled={record.isApproved}
         >
@@ -83,12 +95,6 @@ function ApproveActivity(props) {
     },
   });
 
-  const [getApproveeData, { loadingApproveeData, approveeData }] = useQuery(GET_MEMBER_DETAILS, {
-    variables: {
-      userAddress,
-    },
-  });
-
   const getApproveeOptions = () => {
     let options = data.members[0].approvees.map(approvee => {
       return { label: approvee.id, value: approvee.id };
@@ -96,13 +102,16 @@ function ApproveActivity(props) {
     return options;
   };
 
+  console.log(approveeData);
+  console.log(data);
+  // console.log(loadingApproveeData);
   return (
     <>
       {props.signer && userAddress ? (
         <div className="pg-wrapper">
           <div className="logging-form-wrapper">
             <div className="form-header">
-              <p>Your Address: {loading ? "loading..." : data.members[0].address}</p>
+              <p>Your Address: {loading ? "loading..." : props.address}</p>
               <p>Activity Approver: {loading ? "loading..." : data.members[0].approver.id}</p>
               <p>Role: {loading ? "loading..." : data.members[0].role}</p>
               <p>
@@ -111,6 +120,7 @@ function ApproveActivity(props) {
                   "loading..."
                 ) : (
                   <Select
+                    size="large"
                     onChange={approvee => {
                       updateSelectedApprovee(approvee);
                       getApproveeData({ variables: { userAddress: approvee } });
@@ -121,15 +131,20 @@ function ApproveActivity(props) {
               </p>
             </div>
             <div>
-              {loadingApproveeData ? (
-                "loading..."
-              ) : (
-                <>
-                  <Space direction="vertical" size={5}></Space>
-                  <h3>Activity Log</h3>
-                  (<Table columns={tableColumns} dataSource={approveeData.members[0].loggedActivities} />
-                </>
-              )}
+              {
+                approveeData && !approveeData[0].loading && approveeData[0].data ? (
+                  <>
+                    <Space direction="vertical" size={5}></Space>
+                    <h3>Activity Log</h3>
+                    <Table columns={tableColumns} dataSource={approveeData[0].data.members[0].loggedActivities} />
+                  </>
+                ) : selectedApprovee === "" ? (
+                  "Select an account to approve their activities"
+                ) : (
+                  "loading"
+                )
+                // "loading..."
+              }
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@ function ActivityHistory(props) {
   const [startTime, updateStartTime] = useState(0);
   const [endTime, updateEndTime] = useState(0);
 
-  const ourContractAddress = 0x1e389a99c3a5670d3882dbd75898a69877d7a835;
+  const ourContractAddress = "0x60F26b793d1774FF0A36012550c9907f7D2785aE";
   const timekeeperContract = new ethers.Contract(ourContractAddress, abi, props.signer);
 
   const updateHoursValue = e => {
@@ -27,16 +27,24 @@ function ActivityHistory(props) {
     updateActivityType(activityType);
   };
 
-  let userAddress = props.address;
+  let userAddress = props.address.toString().toLowerCase();
 
   const GET_MEMBER_DETAILS = gql`
-    query Members($userAddress: String!) {
-      members(address: $userAddress) {
+    query Members($userAddress: ID!) {
+      members(where: { id: $userAddress }) {
         id
         address
         role
-        approver
-        loggedActivities
+        approver {
+          id
+        }
+        loggedActivities {
+          id
+          activityType
+          isApproved
+          numberOfHours
+          startTimestamp
+        }
       }
     }
   `;
@@ -57,10 +65,8 @@ function ActivityHistory(props) {
       dataIndex: "startTimestamp",
       key: "startTimestamp",
       render: timestamp => {
-        let d = new Date(timestamp);
-        return (
-          d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear() + " " + d.getHours() + ":" + d.getMinutes()
-        );
+        let d = new Date(parseInt(timestamp));
+        return d.getDate() + "/" + d.getMonth() + "/" + d.getFullYear() + " " + d.getHours() + ":" + d.getMinutes();
       },
     },
     {
@@ -72,12 +78,15 @@ function ActivityHistory(props) {
       ),
     },
   ];
-
   const { loading, error, data } = useQuery(GET_MEMBER_DETAILS, {
     variables: {
       userAddress,
     },
+    pollInterval: 1000,
   });
+
+  console.log("data");
+  console.log(data);
 
   return (
     <>
@@ -85,24 +94,34 @@ function ActivityHistory(props) {
         <div className="pg-wrapper">
           <div className="logging-form-wrapper">
             <div className="form-header">
-              <p>Your Address: {loading ? "loading..." : data.members[0].address}</p>
-              <p>Activity Approver: {loading ? "loading..." : data.members[0].approver.id}</p>
-              <p>Role: {loading ? "loading..." : data.members[0].role}</p>
+              <p>Your Address: {loading === undefined || loading === true ? "loading..." : props.address}</p>
+              <p>
+                Activity Approver:
+                {loading === undefined || loading === true || !data.members[0]
+                  ? "loading..."
+                  : data.members[0].approver.id}
+              </p>
+              <p>
+                Role:
+                {loading === undefined || loading === true || !data.members[0] ? "loading..." : data.members[0].role}
+              </p>
             </div>
             <div>
-              {loading ? (
+              {loading === undefined || loading === true || !data.members[0] ? (
                 "loading..."
               ) : (
                 <>
                   <Space direction="vertical" size={5}></Space>
                   <h3>Activity Log</h3>
-                  (<Table columns={tableColumns} dataSource={data.members[0].loggedActivities} />
+                  <Table columns={tableColumns} dataSource={data.members[0].loggedActivities} />
                 </>
               )}
             </div>
           </div>
         </div>
-      ) : null}
+      ) : (
+        "No Signer or user address missing"
+      )}
     </>
   );
 }

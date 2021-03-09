@@ -12,7 +12,7 @@ function TimeLogger(props) {
   const [startTime, updateStartTime] = useState(0);
   const [endTime, updateEndTime] = useState(0);
 
-  const ourContractAddress = 0x1e389a99c3a5670d3882dbd75898a69877d7a835;
+  const ourContractAddress = "0x60F26b793d1774FF0A36012550c9907f7D2785aE";
   const timekeeperContract = new ethers.Contract(ourContractAddress, abi, props.signer);
 
   const updateHoursValue = e => {
@@ -27,16 +27,18 @@ function TimeLogger(props) {
     updateActivityType(activityType);
   };
 
-  let userAddress = props.address;
+  let userAddress = props.address.toString().toLowerCase();
+  console.log(userAddress);
 
   const GET_MEMBER_DETAILS = gql`
-    query Members($userAddress: String!) {
-      members(address: $userAddress) {
+    query Members($userAddress: ID) {
+      members(where: { id: $userAddress }) {
         id
         address
         role
-        approver
-        addedBy
+        approver {
+          id
+        }
       }
     }
   `;
@@ -56,9 +58,8 @@ function TimeLogger(props) {
   async function logActivity() {
     if (activityType !== "" && hours !== 0 && startTime !== 0) {
       let isAcivityAdded = await timekeeperContract.logActivity(activityType, hours, startTime, endTime);
-      if (!isAcivityAdded) {
-        alert("Could not log activity");
-      }
+      await isAcivityAdded.wait();
+      props.updateFlagForRefetchingData();
     } else alert("One or more fields are missing relevant data");
   }
   return (
@@ -67,7 +68,7 @@ function TimeLogger(props) {
         <div className="pg-wrapper">
           <div className="logging-form-wrapper">
             <div className="form-header">
-              <p>Your Address: {loading ? "loading..." : data.members[0].address}</p>
+              <p>Your Address: {loading ? "loading..." : props.address}</p>
               <p>Activity Approver: {loading ? "loading..." : data.members[0].approver.id}</p>
               <p>Role: {loading ? "loading..." : data.members[0].role}</p>
             </div>
