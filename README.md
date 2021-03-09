@@ -13,6 +13,7 @@ Users can checkout their activities in the Logged Activities tab.
 Once Approved these timesheets can be further used to automate payments.
 
 This is currently in a POC stage and for creating a larger solution I need to further understand the operations in dOrg. 
+Demo link - https://www.youtube.com/watch?v=X6DaodcpBoU
 
 ## Quick Start
 
@@ -31,6 +32,9 @@ yarn install
 ```bash
 yarn start
 ```
+## How it works
+The contract is storing information of members, their approvers, their logged activities and the status of these logged activities.
+The subgraph indexes all this info and powers the FrontEnd data.
 
 ## Usage Instructions
 
