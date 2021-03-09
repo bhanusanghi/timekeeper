@@ -16,6 +16,7 @@
 
 type Activity @entity {
   id: ID!
+  activityId: BigInt!
   member: Member!
   activityType: String!
   isApproved: Boolean!

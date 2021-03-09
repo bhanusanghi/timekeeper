@@ -44,6 +44,9 @@ contract TimeKeeper {
     constructor() {
         //initialize current members of DAO.
         members[0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266] = "admin";
+        approver[
+            0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+        ] = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
     }
 
     function addMember(address userAddress, string memory role) public {
@@ -118,7 +121,11 @@ contract TimeKeeper {
             approver[member] == msg.sender,
             "This operation can only be carried out by the approver of the member"
         );
-        loggedActivities[msg.sender][nextActivityId].isApproved = true;
+        loggedActivities[member][activityId].isApproved = true;
         emit ApproveActivity(activityId, msg.sender);
+    }
+
+    function getMemberApprover(address member) public view returns(address){
+        return approver[member];
     }
 }

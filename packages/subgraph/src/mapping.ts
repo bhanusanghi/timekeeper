@@ -16,12 +16,12 @@ export function handleLogActivity(event: LogActivity): void {
   let numberOfHours = event.params.numberOfHours;
   let startTimestamp = event.params.startTimestamp;
   let endTimestamp = event.params.endTimestamp;
+  let activityId = event.params.activityId;
 
-  let activity = new Activity(
-    event.transaction.hash.toHex() + "-" + event.logIndex.toString()
-  );
+  let activity = new Activity(activityId.toString());
   let member = Member.load(memberAddress);
   if (!member) return;
+  activity.activityId = activityId;
   activity.activityType = activityType;
   activity.member = memberAddress;
   activity.isApproved = isApproved;
